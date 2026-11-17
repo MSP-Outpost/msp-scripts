@@ -79,7 +79,7 @@
 
 [CmdletBinding(SupportsShouldProcess = $true, PositionalBinding = $false)]
 param(
-    # THIS SCRIPT'S inputs.
+    # Inputs.
     [string] $ClearOldBackups = 'true',
 
     # Reserved inputs (standard section 5). Keep them in every script.
@@ -100,7 +100,7 @@ $OutpostScript = @{
     Fields  = @('Item', 'Change', 'Result')
 }
 
-#region MSP Outpost runtime 1.0.0 -- do not edit.
+#region MSP Outpost runtime 1.0.0 -- do not edit (shared by every MSP Outpost script)
 # Reads inputs, prints, collects rows, writes the RMM field, logs changes, exits.
 # Standard: https://mspoutpost.com/scripts/standard
 
@@ -310,10 +310,75 @@ function Test-OutpostAdmin {
 }
 
 function Get-OutpostSignedInUser {
-    # DOMAIN\user of the console session, or $null when nobody is signed in.
+    # DOMAIN\user of the console session (else the owner of an Explorer shell,
+    # which covers RDP sessions), or $null when nobody is signed in.
     $user = (Get-CimInstance -ClassName Win32_ComputerSystem).UserName
-    if ([string]::IsNullOrWhiteSpace($user)) { return $null }
-    return $user
+    if (-not [string]::IsNullOrWhiteSpace($user)) { return $user }
+    foreach ($shell in @(Get-CimInstance -ClassName Win32_Process -Filter "Name = 'explorer.exe'")) {
+        try {
+            $owner = Invoke-CimMethod -InputObject $shell -MethodName GetOwner
+            if ($owner.ReturnValue -eq 0 -and $owner.User) { return ($owner.Domain + '\' + $owner.User) }
+        }
+        catch { $null = $_ }
+    }
+    return $null
+}
+
+function Invoke-OutpostAsUser {
+    # Runs PowerShell code as the signed-in user (from SYSTEM), the way an RMM's
+    # "run as logged-on user" does: a one-shot scheduled task with that user's
+    # interactive principal. Returns @{ ExitCode; Output } or $null when nobody is
+    # signed in. The code runs with the USER'S rights (never more), sees the user's
+    # HKCU and profile, and must not contain secrets (it is written to disk).
+    param(
+        [Parameter(Mandatory = $true)][string] $Code,
+        [int] $TimeoutSeconds = 120,
+        [string] $User
+    )
+    if (-not $User) { $User = Get-OutpostSignedInUser }
+    if (-not $User) { return $null }
+    $windowsDir = [Environment]::GetFolderPath('Windows')
+    if (-not $windowsDir) { $windowsDir = 'C:\Windows' }
+    # A per-run folder only SYSTEM, Administrators and THIS user can write to, under
+    # the secured data folder: no other user can swap the code before it runs.
+    $id = [Guid]::NewGuid().ToString('N')
+    $folder = Join-Path -Path (Get-OutpostDataFolder) -ChildPath ('RunAsUser\' + $id)
+    $null = New-Item -Path $folder -ItemType Directory -Force
+    Protect-OutpostFolder -Path $folder -ExtraUser $User
+    $scriptFile = Join-Path -Path $folder -ChildPath ($id + '.ps1')
+    $outputFile = Join-Path -Path $folder -ChildPath ($id + '.out.txt')
+    $wrapper = '$ErrorActionPreference = ''Stop''' + "`r`n" + 'try { & {' + "`r`n" + $Code + "`r`n" + '} *>&1 | Out-String -Width 400 | Set-Content -LiteralPath ''' + $outputFile + ''' -Encoding UTF8; exit 0 }' + "`r`n" + 'catch { (''ERROR: '' + $_.Exception.Message) | Set-Content -LiteralPath ''' + $outputFile + ''' -Encoding UTF8; exit 1 }'
+    Set-Content -LiteralPath $scriptFile -Value $wrapper -Encoding UTF8
+    $taskName = 'MSPOutpost-RunAsUser-' + $id
+    $powershell = Join-Path -Path $windowsDir -ChildPath 'System32\WindowsPowerShell\v1.0\powershell.exe'
+    try {
+        $action = New-ScheduledTaskAction -Execute $powershell -Argument ('-NoProfile -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden -File "' + $scriptFile + '"')
+        $principal = New-ScheduledTaskPrincipal -UserId $User -LogonType Interactive -RunLevel Limited
+        $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit ([TimeSpan]::FromSeconds($TimeoutSeconds + 30))
+        $null = Register-ScheduledTask -TaskName $taskName -Action $action -Principal $principal -Settings $settings -Force
+        $started = (Get-Date).AddSeconds(-1)
+        Start-ScheduledTask -TaskName $taskName
+        $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
+        # Done = not Running/Queued, has run since we started it, and has a real
+        # result (267009 = still running, 267011 = has not run yet).
+        do {
+            Start-Sleep -Milliseconds 500
+            $state = [string](Get-ScheduledTask -TaskName $taskName).State
+            $info = Get-ScheduledTaskInfo -TaskName $taskName
+            $finished = ($state -ne 'Running') -and ($state -ne 'Queued') -and ($info.LastRunTime -ge $started) -and (@(267009, 267011) -notcontains $info.LastTaskResult)
+        } while (-not $finished -and [DateTime]::UtcNow -lt $deadline)
+        if (-not $finished) {
+            Stop-ScheduledTask -TaskName $taskName
+            throw "The code run as $User did not finish within $TimeoutSeconds seconds."
+        }
+        $output = if (Test-Path -LiteralPath $outputFile) { (Get-Content -LiteralPath $outputFile -Raw) } else { '' }
+        if ($null -eq $output) { $output = '' }
+        return [pscustomobject]@{ ExitCode = [long]$info.LastTaskResult; Output = $output.TrimEnd() }
+    }
+    finally {
+        Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $folder -Recurse -Force -ErrorAction SilentlyContinue
+    }
 }
 
 function Get-OutpostDataFolder {
@@ -325,7 +390,47 @@ function Get-OutpostDataFolder {
         $windowsDir = if ($env:SystemRoot) { $env:SystemRoot } else { 'C:\Windows' }
         $base = (Split-Path -Path $windowsDir -Qualifier) + '\ProgramData'
     }
-    return (Join-Path -Path $base -ChildPath 'MSPOutpost')
+    $folder = Join-Path -Path $base -ChildPath 'MSPOutpost'
+    if (-not $script:OutpostRun.ContainsKey('DataFolderChecked')) {
+        $script:OutpostRun.DataFolderChecked = $true
+        Protect-OutpostFolder -Path $folder
+    }
+    return $folder
+}
+
+function Protect-OutpostFolder {
+    # Standard users can create folders in ProgramData. If someone pre-created ours,
+    # they could tamper with logs, downloads or code run later. Owner must be
+    # SYSTEM or Administrators, inheritance off, Full control for SYSTEM and
+    # Administrators only, read for Users. Fixed when wrong; a failure is a WARNING.
+    param([Parameter(Mandatory = $true)][string] $Path, [string] $ExtraUser)
+    try {
+        if (-not (Test-Path -LiteralPath $Path)) { $null = New-Item -Path $Path -ItemType Directory -Force }
+        $system = New-Object -TypeName Security.Principal.SecurityIdentifier -ArgumentList 'S-1-5-18'
+        $admins = New-Object -TypeName Security.Principal.SecurityIdentifier -ArgumentList 'S-1-5-32-544'
+        $users = New-Object -TypeName Security.Principal.SecurityIdentifier -ArgumentList 'S-1-5-32-545'
+        $acl = Get-Acl -LiteralPath $Path
+        $ownerSid = (New-Object -TypeName Security.Principal.NTAccount -ArgumentList $acl.Owner).Translate([Security.Principal.SecurityIdentifier])
+        $wantedRules = 3
+        if ($ExtraUser) { $wantedRules = 4 }
+        $ok = ($ownerSid -eq $system -or $ownerSid -eq $admins) -and $acl.AreAccessRulesProtected -and (@($acl.Access).Count -eq $wantedRules)
+        if ($ok) { return }
+        $inherit = [Security.AccessControl.InheritanceFlags]'ContainerInherit, ObjectInherit'
+        $none = [Security.AccessControl.PropagationFlags]::None
+        $new = New-Object -TypeName Security.AccessControl.DirectorySecurity
+        $new.SetOwner($admins)
+        $new.SetAccessRuleProtection($true, $false)
+        $new.AddAccessRule((New-Object -TypeName Security.AccessControl.FileSystemAccessRule -ArgumentList $system, 'FullControl', $inherit, $none, 'Allow'))
+        $new.AddAccessRule((New-Object -TypeName Security.AccessControl.FileSystemAccessRule -ArgumentList $admins, 'FullControl', $inherit, $none, 'Allow'))
+        $new.AddAccessRule((New-Object -TypeName Security.AccessControl.FileSystemAccessRule -ArgumentList $users, 'ReadAndExecute', $inherit, $none, 'Allow'))
+        if ($ExtraUser) {
+            $new.AddAccessRule((New-Object -TypeName Security.AccessControl.FileSystemAccessRule -ArgumentList $ExtraUser, 'Modify', $inherit, $none, 'Allow'))
+        }
+        Set-Acl -LiteralPath $Path -AclObject $new
+    }
+    catch {
+        Write-OutpostWarning -Text "Could not secure the folder $($Path): $($_.Exception.Message)"
+    }
 }
 
 function Write-OutpostLog {
@@ -408,37 +513,85 @@ function Invoke-OutpostChange {
     return $true
 }
 
+function Get-OutpostRmm {
+    # Which RMM can receive a custom field here: NinjaOne, NinjaOneCli, Syncro, Datto, or $null.
+    if (Get-Command -Name 'Ninja-Property-Set' -ErrorAction SilentlyContinue) { return 'NinjaOne' }
+    if ($env:NINJARMMCLI -and (Test-Path -LiteralPath $env:NINJARMMCLI)) { return 'NinjaOneCli' }
+    if ($env:SyncroModule) { return 'Syncro' }
+    if ($env:CS_PROFILE_UID -or (Test-Path -LiteralPath 'HKLM:\SOFTWARE\CentraStage')) { return 'Datto' }
+    return $null
+}
+
 function Write-OutpostField {
+    # Returns $true when the value was written. Never throws: a failed write is a WARNING.
     param([string] $Name, [string] $Value)
     try {
-        if (Get-Command -Name 'Ninja-Property-Set' -ErrorAction SilentlyContinue) {
-            Ninja-Property-Set $Name $Value
-            return
-        }
-        if ($env:NINJARMMCLI -and (Test-Path -LiteralPath $env:NINJARMMCLI)) {
-            & $env:NINJARMMCLI set $Name $Value | Out-Null
-            return
-        }
-        if ($env:SyncroModule) {
-            Import-Module -Name $env:SyncroModule -WarningAction SilentlyContinue
-            Set-Asset-Field -Name $Name -Value $Value
-            return
-        }
-        if ($env:CS_PROFILE_UID -or (Test-Path -LiteralPath 'HKLM:\SOFTWARE\CentraStage')) {
-            if ($Name -notmatch '^(?:Custom)?([1-9][0-9]?|[12][0-9][0-9]|300)$') {
-                Write-OutpostWarning -Text "Datto RMM: ResultField must be a UDF number from 1 to 300, not '$Name'."
-                return
+        switch (Get-OutpostRmm) {
+            'NinjaOne' { Ninja-Property-Set $Name $Value; return $true }
+            'NinjaOneCli' { & $env:NINJARMMCLI set $Name $Value | Out-Null; return ($LASTEXITCODE -eq 0) }
+            'Syncro' {
+                Import-Module -Name $env:SyncroModule -WarningAction SilentlyContinue
+                Set-Asset-Field -Name $Name -Value $Value
+                return $true
             }
-            $udf = 'Custom' + $Matches[1]
-            if ($Value.Length -gt 255) { $Value = $Value.Substring(0, 255) }
-            $null = New-ItemProperty -Path 'HKLM:\SOFTWARE\CentraStage' -Name $udf -Value $Value -PropertyType String -Force
-            return
+            'Datto' {
+                if ($Name -notmatch '^(?:Custom)?([1-9][0-9]?|[12][0-9][0-9]|300)$') {
+                    Write-OutpostWarning -Text "Datto RMM: ResultField must be a UDF number from 1 to 300, not '$Name'."
+                    return $false
+                }
+                $udf = 'Custom' + $Matches[1]
+                if ($Value.Length -gt 255) { $Value = $Value.Substring(0, 255) }
+                $null = New-ItemProperty -Path 'HKLM:\SOFTWARE\CentraStage' -Name $udf -Value $Value -PropertyType String -Force
+                return $true
+            }
         }
         Write-OutpostWarning -Text 'ResultField is set but no supported RMM was detected; the answer is in the RESULT line.'
+        return $false
     }
     catch {
         Write-OutpostWarning -Text "Could not write ResultField '$Name': $($_.Exception.Message)"
+        return $false
     }
+}
+
+function Assert-OutpostSecretField {
+    # Call in Validate, BEFORE changing anything, in a script that will produce a
+    # secret (a generated password): the secret may only go to an RMM custom field,
+    # so ResultField must be set and a supported RMM present, and Answer format is refused.
+    if ($script:OutpostRun.Format -eq 'Answer') {
+        Stop-OutpostRun -Message 'OutputFormat Answer is not allowed here: this script produces a secret. Use Text or Json and a secure ResultField.'
+    }
+    $name = Get-OutpostRawInput -Name 'ResultField'
+    if ($name -eq '') {
+        Stop-OutpostRun -Message 'Set ResultField to a secure/secret custom field first, so the new password is stored and not lost. Nothing was changed.'
+    }
+    $rmm = Get-OutpostRmm
+    if (-not $rmm) {
+        Stop-OutpostRun -Message "ResultField is set but no supported RMM (NinjaOne, Datto RMM, Syncro) was detected to store the secret in. Nothing was changed."
+    }
+    if ($rmm -eq 'NinjaOneCli') {
+        Stop-OutpostRun -Message 'Only the ninjarmm-cli tool was found, which would put the secret on a command line other processes can read. Run this script from NinjaOne itself (where Ninja-Property-Set exists). Nothing was changed.'
+    }
+    if ($rmm -eq 'Datto' -and $name -notmatch '^(?:Custom)?([1-9][0-9]?|[12][0-9][0-9]|300)$') {
+        Stop-OutpostRun -Message "Datto RMM: ResultField must be a UDF number from 1 to 300, not '$name'. Nothing was changed."
+    }
+    $script:OutpostRun.SecretField = $true
+}
+
+function Write-OutpostSecretField {
+    # Writes a secret to ResultField once, right after it was created. The value is
+    # never printed, logged or exported, and Complete-OutpostRun will not overwrite
+    # the field with the answer. A failed write ends the run as ERROR.
+    param([Parameter(Mandatory = $true)][string] $Value)
+    if (-not ($script:OutpostRun.ContainsKey('SecretField') -and $script:OutpostRun.SecretField)) {
+        throw 'Script bug: call Assert-OutpostSecretField in Validate before Write-OutpostSecretField.'
+    }
+    $name = Get-OutpostRawInput -Name 'ResultField'
+    if (-not (Write-OutpostField -Name $name -Value $Value)) {
+        Stop-OutpostRun -Message "The secret was created but could NOT be written to ResultField '$name'. Run again to create a new one."
+    }
+    $script:OutpostRun.SecretWritten = $true
+    Write-OutpostLog -Text "SECRET  written to ResultField $name (value not logged)"
 }
 
 function Complete-OutpostRun {
@@ -491,9 +644,11 @@ function Complete-OutpostRun {
 
     $resultField = ''
     try { $resultField = Get-OutpostRawInput -Name 'ResultField' } catch { $resultField = '' }
-    if ($resultField -ne '') {
+    # A script that handles a secret writes its field itself (Write-OutpostSecretField); never overwrite it.
+    $secretMode = $script:OutpostRun.ContainsKey('SecretField') -and $script:OutpostRun.SecretField
+    if ($resultField -ne '' -and -not $secretMode) {
         $fieldValue = if ($null -ne $script:OutpostRun.FieldValue) { $script:OutpostRun.FieldValue } else { $Answer }
-        Write-OutpostField -Name $resultField -Value $fieldValue
+        $null = Write-OutpostField -Name $resultField -Value $fieldValue
     }
 
     if ($Status -eq 'DRYRUN' -or $Status -eq 'CHANGED') { Write-OutpostLog -Text "$Status  $Answer" }

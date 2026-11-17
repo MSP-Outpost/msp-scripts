@@ -19,19 +19,19 @@
 
 ## What it does
 
-THIS SCRIPT IS READ-ONLY. It reads the members of the built-in Administrators group (found by its SID S-1-5-32-544, so it works in any language) and compares each member with ApprovedMembers. It writes one row per member and alerts (exit 1) when any member is not approved.
+THIS SCRIPT IS READ-ONLY. It reads the members of the built-in Administrators group (found by its SID S-1-5-32-544, so it works in any language) and compares each member with AllowedMembers. It writes one row per member and alerts (exit 1) when any member is not approved.
 
 A member whose SID no longer resolves (a deleted domain account, a PC moved between domains) makes Get-LocalGroupMember fail. Those are the members worth finding, so the script then reads the group through ADSI and reports them by SID.
 
 Domain and Entra groups that sit in the Administrators group are listed as one row with Class Group; their own members are NOT expanded (a PC cannot read them reliably). Approve the group by name or SID.
 
-An approved entry matches the full name (PC\admin), the short name (admin), or a SID (S-1-5-21-...-500), case-insensitive; * and ? are wildcards. When ApprovedMembers is empty the defaults apply: the built-in Administrator account (any SID ending in -500) and Domain Admins (SID ending in -512). Giving a list REPLACES the defaults: name the built-in account in it if you want it approved. Entra-joined PCs add the Global Administrator and Device Administrator roles as S-1-12-1-... members: approve them by SID.
+An approved entry matches the full name (PC\admin), the short name (admin), or a SID (S-1-5-21-...-500), case-insensitive; * and ? are wildcards. When AllowedMembers is empty the defaults apply: the built-in Administrator account (any SID ending in -500) and Domain Admins (SID ending in -512). Giving a list REPLACES the defaults: name the built-in account in it if you want it approved. Entra-joined PCs add the Global Administrator and Device Administrator roles as S-1-12-1-... members: approve them by SID.
 
 ## Inputs
 
 | Input | Meaning | Default | Environment variable |
 |---|---|---|---|
-| `ApprovedMembers` | Members allowed to be local administrators, separated by commas, e.g. "Administrator, CONTOSO\Domain Admins, CONTOSO\Desk Techs". Default empty: the built-in Administrator and Domain Admins, matched by SID. | (empty) | `ApprovedMembers` or `APPROVED_MEMBERS` |
+| `AllowedMembers` | Members allowed to be local administrators, separated by commas, e.g. "Administrator, CONTOSO\Domain Admins, CONTOSO\Desk Techs". Default empty: the built-in Administrator and Domain Admins, matched by SID. | (empty) | `AllowedMembers` or `ALLOWED_MEMBERS` |
 
 <a id="standard-inputs"></a>
 
@@ -50,7 +50,7 @@ From an elevated Windows PowerShell prompt, or from your RMM as a PowerShell scr
 Alerts unless only the built-in Administrator and Domain Admins are admins.
 
 ```powershell
-.\test-local-admins.ps1 -ApprovedMembers "Administrator, helpdesk, CONTOSO\Desk Techs"
+.\test-local-admins.ps1 -AllowedMembers "Administrator, helpdesk, CONTOSO\Desk Techs"
 ```
 
 Approves exactly those three; anyone else raises an alert.
@@ -59,7 +59,7 @@ Approves exactly those three; anyone else raises an alert.
 
 Upload the script as a PowerShell script and run it as the System account. Pass inputs in whichever way your RMM supports:
 
-- **Script variables or environment variables:** create a variable with the same name as the input (for example `ApprovedMembers`). Both the PascalCase name and the UPPER_SNAKE name work.
+- **Script variables or environment variables:** create a variable with the same name as the input (for example `AllowedMembers`). Both the PascalCase name and the UPPER_SNAKE name work.
 - **Command-line arguments:** `-InputName value`.
 - **No variables at all:** edit the default for that input in the `param()` block at the top of the file.
 
