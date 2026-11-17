@@ -14,8 +14,8 @@
 | Risk | Low |
 | Reboot | Never |
 | Typical runtime | 1 to 10 minutes (longer with ComponentCleanup) |
-| Version | 1.0.0 |
-| Updated | 2026-11-16 |
+| Version | 1.0.1 |
+| Updated | 2026-11-17 |
 
 ## What it does
 
@@ -99,6 +99,7 @@ Every change is also logged to `%ProgramData%\MSPOutpost\Logs\clear-disk-space.l
 
 ## Changelog
 
+- 1.0.1 2026-11-17 Freed nothing and locked nothing (Windows kept its Delivery Optimization files) now ends OK, not ERROR.
 - 1.0.0 2026-11-16 First version.
 
 ## More

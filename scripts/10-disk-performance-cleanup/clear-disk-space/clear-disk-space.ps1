@@ -72,8 +72,8 @@
 .NOTES
     Name:        Disk full first aid - silent cleanup
     Slug:        clear-disk-space
-    Version:     1.0.0
-    Updated:     2026-11-16
+    Version:     1.0.1
+    Updated:     2026-11-17
     Type:        Action
     Category:    10 Disk, performance & cleanup
     Platforms:   Windows 10, Windows 11, Windows Server 2016+
@@ -90,6 +90,7 @@
     License:     MIT
     Disclaimer:  Provided "as is" under the MIT License, without warranty of any kind. Test before production use. MSP Outpost and User First Digital Inc. accept no liability for any damage or loss.
     Changelog:
+      1.0.1  2026-11-17  Freed nothing and locked nothing (Windows kept its Delivery Optimization files) now ends OK, not ERROR.
       1.0.0  2026-11-16  First version.
 #>
 
@@ -112,7 +113,7 @@ param(
 # Identity: must match the .NOTES header (the build checks it).
 $OutpostScript = @{
     Slug    = 'clear-disk-space'
-    Version = '1.0.0'
+    Version = '1.0.1'
     Type    = 'Action'
     Risk    = 'Low'
     Inputs  = @('MinAgeDays', 'MinimumMB', 'IncludeBrowserCaches', 'ComponentCleanup')
@@ -1021,7 +1022,12 @@ try {
     # Verify (skipped in a dry run: nothing was changed)
     if (-not $script:OutpostRun.DryRun) {
         if ($script:Freed -eq 0 -and $foundBytes -gt 0) {
-            Stop-OutpostRun -Message "No file could be deleted: $($script:Locked) file(s) were in use. Run again after a reboot."
+            if ($script:Locked -gt 0) {
+                Stop-OutpostRun -Message "No file could be deleted: $($script:Locked) file(s) were in use. Run again after a reboot."
+            }
+            # Nothing locked by us, nothing freed: Windows kept what it is still using
+            # (Delivery Optimization keeps an active download's files). Not a failure.
+            Complete-OutpostRun -Status 'OK' -Answer ("Nothing was freed on {0}: Windows kept the files it is still using. Run again later." -f $SystemDrive)
         }
     }
 
