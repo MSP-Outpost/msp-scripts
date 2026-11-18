@@ -717,8 +717,10 @@ trap {
 #endregion MSP Outpost runtime
 
 # ---- Constants ------------------------------------------------------------
-# Stop order; the first three are started again afterwards.
-$ServiceNames = @('wuauserv', 'bits', 'cryptsvc', 'msiserver')
+# Stop order; wuauserv, bits and cryptsvc are started again afterwards, the others
+# only if they were running. UsoSvc (Update Orchestrator) holds SoftwareDistribution
+# and starts wuauserv again on Windows 11, so it is stopped first (2026-11-18).
+$ServiceNames = @('UsoSvc', 'wuauserv', 'bits', 'cryptsvc', 'msiserver')
 $AlwaysStartNames = @('wuauserv', 'bits', 'cryptsvc')
 $ServiceWaitSeconds = 60
 $CacheFolders = @(
@@ -769,6 +771,21 @@ function Get-InstallActivity {
         if ($msiRuns.Count -gt 0) { return 'Windows Installer is installing' }
     }
     return ''
+}
+
+function Rename-UpdateFolder {
+    # A just-stopped service (or Windows, right after start-up) can hold a handle in
+    # the folder for a few seconds (2026-11-17, a freshly started VM): retry before failing.
+    param([string] $Folder, [string] $NewName)
+    for ($try = 1; $try -le 12; $try++) {
+        try { Rename-Item -LiteralPath $Folder -NewName $NewName -ErrorAction Stop; return }
+        catch {
+            if ($try -eq 12) { throw "Could not rename $Folder after a minute of retries; another process is holding it ($($_.Exception.Message)). Restart the PC, then run again." }
+            Start-Sleep -Seconds 5
+            # Windows Update is trigger-started: Windows can start it again behind us, so stop it again.
+            foreach ($name in $ServiceNames) { try { Stop-UpdateService -Name $name } catch { $null = $_ } }
+        }
+    }
 }
 
 function Get-OldBackup {
@@ -827,7 +844,7 @@ try {
         foreach ($folder in $existingFolders) {
             $newName = (Split-Path -Path $folder -Leaf) + ".old-$stamp"
             $null = Invoke-OutpostChange -Item $folder -Change "Rename to $newName" -Action {
-                Rename-Item -LiteralPath $folder -NewName $newName
+                Rename-UpdateFolder -Folder $folder -NewName $newName
             }
         }
     }
