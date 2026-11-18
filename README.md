@@ -2,7 +2,7 @@
 
 > PowerShell and bash scripts for MSPs: monitors, reports and safe fixes for Windows, macOS and Linux, from [MSP Outpost](https://mspoutpost.com/scripts).
 
-This repository holds 114 scripts: 92 PowerShell scripts for Windows and 22 bash scripts for macOS and Linux. Each one has its own folder with the script and a README that explains what it does, what it changes, which inputs it takes and how to run it in your RMM. Each script is one self-contained file: no modules to install, nothing else to copy.
+This repository holds 119 scripts: 97 PowerShell scripts for Windows and 22 bash scripts for macOS and Linux. Each one has its own folder with the script and a README that explains what it does, what it changes, which inputs it takes and how to run it in your RMM. Each script is one self-contained file: no modules to install, nothing else to copy.
 
 ## Safety first
 
@@ -36,10 +36,12 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 |---|---|---|---|
 | [Which other RMM agents are on this PC](scripts/01-onboarding-provisioning/get-rmm-agents) | Report | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [Break-glass local admin - create or reset it](scripts/01-onboarding-provisioning/new-local-admin-account) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
+| [Remove remote-access tools that are not approved](scripts/01-onboarding-provisioning/remove-remote-access-tools) | Action | High | Windows 10, Windows 11, Windows Server 2016+ |
 | [Remove ScreenConnect instances that are not yours](scripts/01-onboarding-provisioning/remove-screenconnect-instances) | Action | High | Windows 10, Windows 11, Windows Server 2016+ |
 | [New PC full of junk apps - Windows 11 debloat (safe MSP profile)](scripts/01-onboarding-provisioning/remove-windows-bloatware) | Action | High | Windows 10, Windows 11 |
 | [Rename the computer - fixed name or PREFIX-SERIAL pattern](scripts/01-onboarding-provisioning/set-computer-name) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [New Windows PC needs the standard settings - apply the MSP baseline](scripts/01-onboarding-provisioning/set-windows-pc-baseline) | Action | Low | Windows 10, Windows 11 |
+| [Remove the previous provider's RMM agent](scripts/01-onboarding-provisioning/uninstall-rmm-agent) | Action | High | Windows 10, Windows 11, Windows Server 2016+ |
 
 ### Software deployment & updates
 
@@ -71,6 +73,7 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 | [Block USB storage with an allow-list](scripts/04-security-hardening-compliance/disable-usb-storage) | Action | High | Windows 10, Windows 11, Windows Server 2016+ |
 | [Turn on BitLocker and store the recovery key](scripts/04-security-hardening-compliance/enable-bitlocker) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [Windows Firewall is off - turn it on and block inbound](scripts/04-security-hardening-compliance/enable-windows-firewall) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
+| [Cyber-insurance questionnaire - device evidence pack](scripts/04-security-hardening-compliance/get-cyber-insurance-evidence) | Report | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [Which remote-access tools are installed](scripts/04-security-hardening-compliance/get-remote-access-tools) | Report | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [Too many local admins - remove the unapproved ones](scripts/04-security-hardening-compliance/remove-local-admin-members) | Action | High | Windows 10, Windows 11, Windows Server 2016+ |
 | [Defender attack surface reduction rules - audit then block](scripts/04-security-hardening-compliance/set-defender-asr-rules) | Action | Low | Windows 10 1709+, Windows 11, Windows Server 2019+ |
@@ -91,6 +94,8 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 | Script | Type | Risk | Platforms |
 |---|---|---|---|
 | [End network isolation and restore the firewall](scripts/05-av-edr-incident-response/disable-network-isolation) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
+| [Isolate a PC from the network but keep the RMM](scripts/05-av-edr-incident-response/enable-network-isolation) | Action | High | Windows 10, Windows 11, Windows Server 2016+ |
+| [Ransomware triage: collect the evidence before a reboot](scripts/05-av-edr-incident-response/get-ransomware-triage) | Report | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [Defender turned off or broken - switch it back on](scripts/05-av-edr-incident-response/repair-defender) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [Is Microsoft Defender actually protecting this PC - end-to-end health](scripts/05-av-edr-incident-response/test-defender-health) | Monitor | Low | Windows 10, Windows 11, Windows Server 2016+ |
 
