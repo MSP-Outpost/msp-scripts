@@ -14,8 +14,8 @@
 | Risk | Low |
 | Reboot | Never |
 | Typical runtime | 1 to 3 minutes |
-| Version | 1.0.0 |
-| Updated | 2026-11-16 |
+| Version | 1.0.1 |
+| Updated | 2026-11-18 |
 
 ## What it does
 
@@ -94,6 +94,7 @@ Every change is also logged to `%ProgramData%\MSPOutpost\Logs\reset-windows-upda
 
 ## Changelog
 
+- 1.0.1 2026-11-18 Stops the Update Orchestrator (UsoSvc) first and retries the folder rename: on Windows 11 it held SoftwareDistribution open.
 - 1.0.0 2026-11-16 First version.
 
 ## More

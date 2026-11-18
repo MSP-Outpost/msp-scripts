@@ -56,8 +56,8 @@
 .NOTES
     Name:        Windows Update stuck or failing - reset the update stack
     Slug:        reset-windows-update
-    Version:     1.0.0
-    Updated:     2026-11-16
+    Version:     1.0.1
+    Updated:     2026-11-18
     Type:        Action
     Category:    03 Patching & Windows Update
     Platforms:   Windows 10, Windows 11, Windows Server 2016+
@@ -74,6 +74,7 @@
     License:     MIT
     Disclaimer:  Provided "as is" under the MIT License, without warranty of any kind. Test before production use. MSP Outpost and User First Digital Inc. accept no liability for any damage or loss.
     Changelog:
+      1.0.1  2026-11-18  Stops the Update Orchestrator (UsoSvc) first and retries the folder rename: on Windows 11 it held SoftwareDistribution open.
       1.0.0  2026-11-16  First version.
 #>
 
@@ -93,7 +94,7 @@ param(
 # Identity: must match the .NOTES header (the build checks it).
 $OutpostScript = @{
     Slug    = 'reset-windows-update'
-    Version = '1.0.0'
+    Version = '1.0.1'
     Type    = 'Action'
     Risk    = 'Low'
     Inputs  = @('ClearOldBackups')
