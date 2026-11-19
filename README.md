@@ -2,7 +2,7 @@
 
 > PowerShell and bash scripts for MSPs: monitors, reports and safe fixes for Windows, macOS and Linux, from [MSP Outpost](https://mspoutpost.com/scripts).
 
-This repository holds 119 scripts: 97 PowerShell scripts for Windows and 22 bash scripts for macOS and Linux. Each one has its own folder with the script and a README that explains what it does, what it changes, which inputs it takes and how to run it in your RMM. Each script is one self-contained file: no modules to install, nothing else to copy.
+This repository holds 122 scripts: 100 PowerShell scripts for Windows and 22 bash scripts for macOS and Linux. Each one has its own folder with the script and a README that explains what it does, what it changes, which inputs it takes and how to run it in your RMM. Each script is one self-contained file: no modules to install, nothing else to copy.
 
 ## Safety first
 
@@ -173,12 +173,14 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 | [Hardware and OS inventory](scripts/13-inventory-reporting-audit/get-hardware-inventory) | Report | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [Installed software inventory and app finder](scripts/13-inventory-reporting-audit/get-installed-software) | Report | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [Local user accounts on this PC](scripts/13-inventory-reporting-audit/get-local-users) | Report | Low | Windows 10, Windows 11, Windows Server 2016+ |
+| [PC facts for the quarterly review](scripts/13-inventory-reporting-audit/get-qbr-data-pack) | Report | Low | Windows 10, Windows 11, Windows Server 2016+ |
 
 ### Remediation & self-healing
 
 | Script | Type | Risk | Platforms |
 |---|---|---|---|
 | [Teams won't load - clear the Teams cache](scripts/14-remediation-self-healing/clear-teams-cache) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
+| [RMM agent stopped, disabled or missing - start it again](scripts/14-remediation-self-healing/repair-rmm-agent) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [Windows corrupted or SFC fails - DISM then SFC repair](scripts/14-remediation-self-healing/repair-windows-image) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [OneDrive not syncing - reset it](scripts/14-remediation-self-healing/reset-onedrive) | Action | Low | Windows 10, Windows 11 |
 | [Service stopped or hung - restart it](scripts/14-remediation-self-healing/restart-service) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
@@ -252,6 +254,7 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 | Script | Type | Risk | Platforms |
 |---|---|---|---|
 | [Tell the user something on a Mac - dialog or notification](scripts/23-end-user-communication-self-service/new-mac-user-notification) | Action | Low | macOS 13+ |
+| [Report a problem - diagnostics and description in a zip](scripts/23-end-user-communication-self-service/new-problem-report) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [Tell the user something - show a notification](scripts/23-end-user-communication-self-service/new-user-notification) | Action | Low | Windows 10, Windows 11 |
 | [Restart a PC - now, at a set time or if pending](scripts/23-end-user-communication-self-service/restart-computer) | Action | High | Windows 10, Windows 11, Windows Server 2016+ |
 
