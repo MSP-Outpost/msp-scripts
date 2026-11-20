@@ -2,7 +2,7 @@
 
 > PowerShell and bash scripts for MSPs: monitors, reports and safe fixes for Windows, macOS and Linux, from [MSP Outpost](https://mspoutpost.com/scripts).
 
-This repository holds 185 scripts: 163 PowerShell scripts for Windows and 22 bash scripts for macOS and Linux. Each one has its own folder with the script and a README that explains what it does, what it changes, which inputs it takes and how to run it in your RMM. Each script is one self-contained file: no modules to install, nothing else to copy.
+This repository holds 186 scripts: 164 PowerShell scripts for Windows and 22 bash scripts for macOS and Linux. Each one has its own folder with the script and a README that explains what it does, what it changes, which inputs it takes and how to run it in your RMM. Each script is one self-contained file: no modules to install, nothing else to copy.
 
 ## Safety first
 
@@ -255,6 +255,7 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 | Script | Type | Risk | Platforms |
 |---|---|---|---|
 | [Employee left - disable in AD, strip groups, move, log off](scripts/17-offboarding-decommission/invoke-ad-offboarding) | Action | High | Windows Server 2016+ (domain controller or domain member) |
+| [Lost or returned laptop - remote wipe or retire in Intune](scripts/17-offboarding-decommission/invoke-device-wipe) | Action | High | Windows 10, 11, Server 2016+, with the app certificate |
 | [Employee left - Microsoft 365 offboarding](scripts/17-offboarding-decommission/invoke-m365-offboarding) | Action | High | Windows 10, 11, Server 2016+, with the app certificate |
 | [Retire a PC - leave domain and Entra ID, remove MDM, write the record](scripts/17-offboarding-decommission/invoke-pc-retirement) | Action | High | Windows 10, Windows 11 |
 
