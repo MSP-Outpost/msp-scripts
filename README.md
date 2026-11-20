@@ -2,7 +2,7 @@
 
 > PowerShell and bash scripts for MSPs: monitors, reports and safe fixes for Windows, macOS and Linux, from [MSP Outpost](https://mspoutpost.com/scripts).
 
-This repository holds 122 scripts: 100 PowerShell scripts for Windows and 22 bash scripts for macOS and Linux. Each one has its own folder with the script and a README that explains what it does, what it changes, which inputs it takes and how to run it in your RMM. Each script is one self-contained file: no modules to install, nothing else to copy.
+This repository holds 182 scripts: 160 PowerShell scripts for Windows and 22 bash scripts for macOS and Linux. Each one has its own folder with the script and a README that explains what it does, what it changes, which inputs it takes and how to run it in your RMM. Each script is one self-contained file: no modules to install, nothing else to copy.
 
 ## Safety first
 
@@ -35,6 +35,8 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 | Script | Type | Risk | Platforms |
 |---|---|---|---|
 | [Which other RMM agents are on this PC](scripts/01-onboarding-provisioning/get-rmm-agents) | Report | Low | Windows 10, Windows 11, Windows Server 2016+ |
+| [Autopilot hash not registered - upload this PC's hardware hash](scripts/01-onboarding-provisioning/invoke-autopilot-hash-upload) | Action | Low | Windows 10 1703+ or 11 (the PC being registered) |
+| [Join this PC to the AD domain, into the right OU](scripts/01-onboarding-provisioning/invoke-domain-join) | Action | High | Windows 10, 11, Server 2016+ (not a domain controller) |
 | [Break-glass local admin - create or reset it](scripts/01-onboarding-provisioning/new-local-admin-account) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [Remove remote-access tools that are not approved](scripts/01-onboarding-provisioning/remove-remote-access-tools) | Action | High | Windows 10, Windows 11, Windows Server 2016+ |
 | [Remove ScreenConnect instances that are not yours](scripts/01-onboarding-provisioning/remove-screenconnect-instances) | Action | High | Windows 10, Windows 11, Windows Server 2016+ |
@@ -83,11 +85,13 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 | [Windows Firewall off or wide open - profile and port monitor](scripts/04-security-hardening-compliance/test-firewall-profiles) | Monitor | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [Unapproved local administrators](scripts/04-security-hardening-compliance/test-local-admins) | Monitor | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [Risky local accounts on this PC](scripts/04-security-hardening-compliance/test-local-user-hygiene) | Monitor | Low | Windows 10, Windows 11, Windows Server 2016+ |
+| [NTLMv1 and LM hashes still allowed](scripts/04-security-hardening-compliance/test-ntlm-settings) | Monitor | Low | Windows 10, 11, Server 2016+ (best on each DC) |
 | [Remote Desktop open to the internet or without NLA](scripts/04-security-hardening-compliance/test-rdp-exposure) | Monitor | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [Secure Boot 2023 certificate update](scripts/04-security-hardening-compliance/test-secure-boot-certificates) | Monitor | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [SMBv1 still enabled - find where and who uses it](scripts/04-security-hardening-compliance/test-smb1) | Monitor | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [Unapproved remote-access tool installed](scripts/04-security-hardening-compliance/test-unapproved-remote-tools) | Monitor | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [USB storage not blocked - check the block policy](scripts/04-security-hardening-compliance/test-usb-storage-blocked) | Monitor | Low | Windows 10, Windows 11, Windows Server 2016+ |
+| [Windows LAPS not configured or not backing up](scripts/04-security-hardening-compliance/test-windows-laps) | Monitor | Low | Windows 11, Windows 10 April 2023+, Server 2019+ |
 
 ### AV / EDR & incident response
 
@@ -104,18 +108,62 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 | Script | Type | Risk | Platforms |
 |---|---|---|---|
 | [User locked out - unlock the account](scripts/06-identity-ad-entra-m365-users/clear-account-lockout) | Action | Low | Windows Server 2016+ (domain controller or domain member) |
+| [Shared mailboxes that can sign in - block them](scripts/06-identity-ad-entra-m365-users/disable-shared-mailbox-sign-in) | Action | High | Windows 10, 11, Server 2016+, with the app certificate |
 | [Disable stale AD users and computers and move them to a holding OU](scripts/06-identity-ad-entra-m365-users/disable-stale-ad-objects) | Action | High | Windows Server 2016+ (domain controller or domain member) |
+| [Who is in this AD group - list its members](scripts/06-identity-ad-entra-m365-users/get-ad-group-members) | Report | Low | Windows Server 2016+ (domain controller or domain member) |
+| [Passwords expiring soon - which AD users to warn](scripts/06-identity-ad-entra-m365-users/get-ad-password-expiry) | Report | Low | Windows Server 2016+ (domain controller or domain member) |
 | [Export all Active Directory users with key attributes](scripts/06-identity-ad-entra-m365-users/get-ad-users) | Report | Low | Windows Server 2016+ (domain controller or domain member) |
+| [Conditional Access drifted from our baseline](scripts/06-identity-ad-entra-m365-users/get-conditional-access-drift) | Report | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Who holds admin roles in Microsoft 365](scripts/06-identity-ad-entra-m365-users/get-entra-admin-roles) | Report | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Which computers have a managed local admin password](scripts/06-identity-ad-entra-m365-users/get-laps-coverage) | Report | Low | Domain member for AD; any Windows for Entra ID |
+| [Who still uses legacy authentication](scripts/06-identity-ad-entra-m365-users/get-legacy-auth-signins) | Report | Low | Windows 10, 11, Server 2016+, with the app certificate |
 | [Stale AD users and computers - who has not signed in for 90 days](scripts/06-identity-ad-entra-m365-users/get-stale-ad-objects) | Report | Low | Windows Server 2016+ (domain controller or domain member) |
+| [Identity posture of every client tenant](scripts/06-identity-ad-entra-m365-users/get-tenant-identity-posture) | Report | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Sign-in history of one user](scripts/06-identity-ad-entra-m365-users/get-user-signin-history) | Report | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Compromised M365 account - contain it in order](scripts/06-identity-ad-entra-m365-users/invoke-compromised-account-containment) | Action | High | Windows 10, 11, Server 2016+, with the app certificate |
+| [Change not showing in Microsoft 365 - force an Entra Connect sync](scripts/06-identity-ad-entra-m365-users/invoke-entra-delta-sync) | Action | Low | Windows Server 2016+ (the Microsoft Entra Connect server) |
+| [New starter same as Jane - copy group memberships](scripts/06-identity-ad-entra-m365-users/invoke-group-membership-copy) | Action | High | Windows 10, 11, Server 2016+, with the app certificate |
+| [New employee - create the AD user like a template user](scripts/06-identity-ad-entra-m365-users/new-ad-user) | Action | Low | Windows Server 2016+ (domain controller or domain member) |
+| [Create Microsoft 365 users from a CSV file](scripts/06-identity-ad-entra-m365-users/new-m365-users-from-csv) | Action | High | Windows 10, 11, Server 2016+, with the app certificate |
+| [Remove risky app consents](scripts/06-identity-ad-entra-m365-users/remove-risky-app-consents) | Action | High | Windows 10, 11, Server 2016+, with the app certificate |
+| [Reset an AD user's password - random, forced change at logon](scripts/06-identity-ad-entra-m365-users/reset-ad-user-password) | Action | Low | Windows Server 2016+ (domain controller or domain member) |
+| [User lost their phone - reset MFA methods](scripts/06-identity-ad-entra-m365-users/reset-user-mfa-methods) | Action | High | Windows 10, 11, Server 2016+, with the app certificate |
+| [AD security group - create it, add or remove members](scripts/06-identity-ad-entra-m365-users/set-ad-group-members) | Action | Low | Windows Server 2016+ (domain controller or domain member) |
+| [Deploy the Conditional Access baseline](scripts/06-identity-ad-entra-m365-users/set-conditional-access-baseline) | Action | High | Windows 10, 11, Server 2016+, with the app certificate |
 | [User keeps getting locked out - find the source](scripts/06-identity-ad-entra-m365-users/test-account-lockout-source) | Monitor | Low | Windows Server 2016+ (domain controller or domain member) |
+| [AD accounts with weak password settings](scripts/06-identity-ad-entra-m365-users/test-ad-weak-account-settings) | Monitor | Low | Windows Server 2016+ (domain controller or domain member) |
+| [Break-glass accounts present, excluded, unused](scripts/06-identity-ad-entra-m365-users/test-break-glass-accounts) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Is anything forcing MFA in Microsoft 365](scripts/06-identity-ad-entra-m365-users/test-conditional-access-state) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Entra Connect server health](scripts/06-identity-ad-entra-m365-users/test-entra-connect-health) | Monitor | Low | Windows Server 2016+ (the Microsoft Entra Connect server) |
+| [Entra Connect stopped syncing](scripts/06-identity-ad-entra-m365-users/test-entra-connect-sync) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
 | [SSO and Teams sign-in broken - Entra join and PRT health](scripts/06-identity-ad-entra-m365-users/test-entra-join-health) | Monitor | Low | Windows 10, Windows 11, Windows Server 2016+ |
+| [Someone was just made an admin](scripts/06-identity-ad-entra-m365-users/test-new-admin-assignments) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [New MFA method registered](scripts/06-identity-ad-entra-m365-users/test-new-mfa-methods) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
 | [Privileged AD groups - nested membership and change alerts](scripts/06-identity-ad-entra-m365-users/test-privileged-ad-groups) | Monitor | Low | Windows Server 2016+ (domain controller or domain member) |
+| [Apps with risky Microsoft 365 permissions](scripts/06-identity-ad-entra-m365-users/test-risky-app-consents) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Shared mailboxes that can sign in](scripts/06-identity-ad-entra-m365-users/test-shared-mailbox-sign-in) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Users can consent to any app](scripts/06-identity-ad-entra-m365-users/test-user-consent-settings) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
 
 ### Exchange & email
 
 | Script | Type | Risk | Platforms |
 |---|---|---|---|
+| [Audit logging off - turn on unified and mailbox auditing](scripts/07-exchange-email/enable-audit-logging) | Action | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [DKIM signing not on - create the config and turn it on](scripts/07-exchange-email/enable-dkim-signing) | Action | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Tag external email in Outlook](scripts/07-exchange-email/enable-external-email-tag) | Action | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Turn on the archive and auto-expanding archive](scripts/07-exchange-email/enable-mailbox-archive) | Action | Low | Windows 10, 11, Server 2016+, with the app certificate |
 | [Is this domain protected from email spoofing - SPF, DKIM and DMARC check](scripts/07-exchange-email/get-email-authentication-posture) | Report | Low | Windows 10, Windows 11, Windows Server 2016+ |
+| [Email protection below standard](scripts/07-exchange-email/get-email-protection-posture) | Report | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Who can access which mailbox](scripts/07-exchange-email/get-mailbox-permissions) | Report | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Mailbox nearly full - size and quota report](scripts/07-exchange-email/get-mailbox-sizes) | Report | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Where did this email go - message trace](scripts/07-exchange-email/get-message-trace) | Report | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Mail forwarding to outside addresses - turn it off](scripts/07-exchange-email/remove-external-mail-forwarding) | Action | High | Windows 10, 11, Server 2016+, with the app certificate |
+| [Block automatic external forwarding for the tenant](scripts/07-exchange-email/set-external-forwarding-block) | Action | High | Windows 10, 11, Server 2016+, with the app certificate |
+| [Give or remove mailbox access](scripts/07-exchange-email/set-mailbox-permission) | Action | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [DKIM signing not on for a domain](scripts/07-exchange-email/test-dkim-signing) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Mail forwarding to outside addresses](scripts/07-exchange-email/test-external-mail-forwarding) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Microsoft 365 app access check (permissions and certificate expiry)](scripts/07-exchange-email/test-m365-app-access) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [New inbox rules that hide mail](scripts/07-exchange-email/test-suspicious-inbox-rules) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
 
 ### Backup & DR
 
@@ -174,6 +222,7 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 | [Installed software inventory and app finder](scripts/13-inventory-reporting-audit/get-installed-software) | Report | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [Local user accounts on this PC](scripts/13-inventory-reporting-audit/get-local-users) | Report | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [PC facts for the quarterly review](scripts/13-inventory-reporting-audit/get-qbr-data-pack) | Report | Low | Windows 10, Windows 11, Windows Server 2016+ |
+| [New client tenant - Microsoft 365 onboarding audit](scripts/13-inventory-reporting-audit/get-tenant-onboarding-audit) | Report | Low | Windows 10, 11, Server 2016+, with the app certificate |
 
 ### Remediation & self-healing
 
@@ -205,13 +254,18 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 | Script | Type | Risk | Platforms |
 |---|---|---|---|
 | [Employee left - disable in AD, strip groups, move, log off](scripts/17-offboarding-decommission/invoke-ad-offboarding) | Action | High | Windows Server 2016+ (domain controller or domain member) |
+| [Employee left - Microsoft 365 offboarding](scripts/17-offboarding-decommission/invoke-m365-offboarding) | Action | High | Windows 10, 11, Server 2016+, with the app certificate |
 | [Retire a PC - leave domain and Entra ID, remove MDM, write the record](scripts/17-offboarding-decommission/invoke-pc-retirement) | Action | High | Windows 10, Windows 11 |
 
 ### Server roles (AD DS, Hyper-V, SQL, IIS, file, RDS)
 
 | Script | Type | Risk | Platforms |
 |---|---|---|---|
+| [Windows DNS server - forwarders, aging and scavenging](scripts/18-server-roles-ad-ds-hyper-v-sql-iis-file-rds/get-dns-server-config) | Report | Low | Windows Server 2016+ (DNS Server role) |
+| [Back up all GPOs with HTML reports](scripts/18-server-roles-ad-ds-hyper-v-sql-iis-file-rds/invoke-gpo-backup) | Action | Low | Windows Server 2016+ (DC, or a member with GPMC) |
 | [Is Active Directory healthy - services, replication, FSMO, dcdiag](scripts/18-server-roles-ad-ds-hyper-v-sql-iis-file-rds/test-ad-health) | Monitor | Low | Windows Server 2016+ (domain controller) |
+| [Domain controller backup too old](scripts/18-server-roles-ad-ds-hyper-v-sql-iis-file-rds/test-dc-backup-age) | Monitor | Low | Windows Server 2016+ (domain controller) |
+| [Someone changed a GPO - alert on any GPO change](scripts/18-server-roles-ad-ds-hyper-v-sql-iis-file-rds/test-gpo-changes) | Monitor | Low | Windows Server 2016+ (DC, or a member with GPMC) |
 
 ### macOS management
 
@@ -243,10 +297,20 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 | [Who has root? Unexpected sudo or UID 0 accounts](scripts/20-linux-management/test-linux-privileged-users) | Monitor | Low | Ubuntu 22.04+, Debian 12+, RHEL/Rocky/Alma 9+ |
 | [Linux disk, memory or CPU over limit](scripts/20-linux-management/test-linux-resources) | Monitor | Low | Ubuntu 22.04+, Debian 12+, RHEL/Rocky/Alma 9+ |
 
+### Cloud & Intune
+
+| Script | Type | Risk | Platforms |
+|---|---|---|---|
+| [Intune remediation - create the detection and remediation pair](scripts/21-cloud-intune/new-intune-remediation) | Action | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [App secret or certificate expiring in Microsoft 365](scripts/21-cloud-intune/test-app-credential-expiry) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Stale or duplicate devices in Intune](scripts/21-cloud-intune/test-stale-intune-devices) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
+
 ### Licensing & asset lifecycle
 
 | Script | Type | Risk | Platforms |
 |---|---|---|---|
+| [Paying for unused Microsoft 365 licences](scripts/22-licensing-asset-lifecycle/get-unused-m365-licenses) | Report | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Reclaim Microsoft 365 licences from disabled users](scripts/22-licensing-asset-lifecycle/remove-unused-m365-licenses) | Action | High | Windows 10, 11, Server 2016+, with the app certificate |
 | [Windows not activated - activation status and edition](scripts/22-licensing-asset-lifecycle/test-windows-activation) | Monitor | Low | Windows 10, Windows 11, Windows Server 2016+ |
 
 ### End-user communication & self-service
@@ -264,6 +328,7 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 |---|---|---|---|
 | [Run a command as the logged-in user (from SYSTEM)](scripts/24-utility-misc/invoke-as-logged-in-user) | Action | High | Windows 10, Windows 11, Windows Server 2016+ |
 | [Download a file safely - https, SHA-256 check, size limit](scripts/24-utility-misc/invoke-file-download) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
+| [Send an email through Microsoft Graph from a script](scripts/24-utility-misc/invoke-graph-mail-send) | Action | Low | Windows 10, 11, Server 2016+, with the app certificate |
 | [Wake a powered-off PC - Wake-on-LAN](scripts/24-utility-misc/invoke-wake-on-lan) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [Create or update a scheduled task](scripts/24-utility-misc/new-scheduled-task) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
 
