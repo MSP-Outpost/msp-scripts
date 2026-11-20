@@ -2,7 +2,7 @@
 
 > PowerShell and bash scripts for MSPs: monitors, reports and safe fixes for Windows, macOS and Linux, from [MSP Outpost](https://mspoutpost.com/scripts).
 
-This repository holds 182 scripts: 160 PowerShell scripts for Windows and 22 bash scripts for macOS and Linux. Each one has its own folder with the script and a README that explains what it does, what it changes, which inputs it takes and how to run it in your RMM. Each script is one self-contained file: no modules to install, nothing else to copy.
+This repository holds 185 scripts: 163 PowerShell scripts for Windows and 22 bash scripts for macOS and Linux. Each one has its own folder with the script and a README that explains what it does, what it changes, which inputs it takes and how to run it in your RMM. Each script is one self-contained file: no modules to install, nothing else to copy.
 
 ## Safety first
 
@@ -137,6 +137,7 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 | [Entra Connect server health](scripts/06-identity-ad-entra-m365-users/test-entra-connect-health) | Monitor | Low | Windows Server 2016+ (the Microsoft Entra Connect server) |
 | [Entra Connect stopped syncing](scripts/06-identity-ad-entra-m365-users/test-entra-connect-sync) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
 | [SSO and Teams sign-in broken - Entra join and PRT health](scripts/06-identity-ad-entra-m365-users/test-entra-join-health) | Monitor | Low | Windows 10, Windows 11, Windows Server 2016+ |
+| [Users without MFA or with SMS-only MFA](scripts/06-identity-ad-entra-m365-users/test-mfa-registration) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
 | [Someone was just made an admin](scripts/06-identity-ad-entra-m365-users/test-new-admin-assignments) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
 | [New MFA method registered](scripts/06-identity-ad-entra-m365-users/test-new-mfa-methods) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
 | [Privileged AD groups - nested membership and change alerts](scripts/06-identity-ad-entra-m365-users/test-privileged-ad-groups) | Monitor | Low | Windows Server 2016+ (domain controller or domain member) |
@@ -301,6 +302,8 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 
 | Script | Type | Risk | Platforms |
 |---|---|---|---|
+| [Back up the whole Intune configuration to JSON](scripts/21-cloud-intune/invoke-intune-config-backup) | Action | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Package an app for Intune - build the .intunewin file](scripts/21-cloud-intune/new-intune-app-package) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [Intune remediation - create the detection and remediation pair](scripts/21-cloud-intune/new-intune-remediation) | Action | Low | Windows 10, 11, Server 2016+, with the app certificate |
 | [App secret or certificate expiring in Microsoft 365](scripts/21-cloud-intune/test-app-credential-expiry) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
 | [Stale or duplicate devices in Intune](scripts/21-cloud-intune/test-stale-intune-devices) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
