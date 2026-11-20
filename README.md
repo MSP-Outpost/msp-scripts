@@ -2,7 +2,7 @@
 
 > PowerShell and bash scripts for MSPs: monitors, reports and safe fixes for Windows, macOS and Linux, from [MSP Outpost](https://mspoutpost.com/scripts).
 
-This repository holds 186 scripts: 164 PowerShell scripts for Windows and 22 bash scripts for macOS and Linux. Each one has its own folder with the script and a README that explains what it does, what it changes, which inputs it takes and how to run it in your RMM. Each script is one self-contained file: no modules to install, nothing else to copy.
+This repository holds 190 scripts: 168 PowerShell scripts for Windows and 22 bash scripts for macOS and Linux. Each one has its own folder with the script and a README that explains what it does, what it changes, which inputs it takes and how to run it in your RMM. Each script is one self-contained file: no modules to install, nothing else to copy.
 
 ## Safety first
 
@@ -114,10 +114,12 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 | [Passwords expiring soon - which AD users to warn](scripts/06-identity-ad-entra-m365-users/get-ad-password-expiry) | Report | Low | Windows Server 2016+ (domain controller or domain member) |
 | [Export all Active Directory users with key attributes](scripts/06-identity-ad-entra-m365-users/get-ad-users) | Report | Low | Windows Server 2016+ (domain controller or domain member) |
 | [Conditional Access drifted from our baseline](scripts/06-identity-ad-entra-m365-users/get-conditional-access-drift) | Report | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Directory sync errors and duplicate UPN or proxy address](scripts/06-identity-ad-entra-m365-users/get-directory-sync-errors) | Report | Low | Windows 10, 11, Server 2016+, with the app certificate |
 | [Who holds admin roles in Microsoft 365](scripts/06-identity-ad-entra-m365-users/get-entra-admin-roles) | Report | Low | Windows 10, 11, Server 2016+, with the app certificate |
 | [Which computers have a managed local admin password](scripts/06-identity-ad-entra-m365-users/get-laps-coverage) | Report | Low | Domain member for AD; any Windows for Entra ID |
 | [Who still uses legacy authentication](scripts/06-identity-ad-entra-m365-users/get-legacy-auth-signins) | Report | Low | Windows 10, 11, Server 2016+, with the app certificate |
 | [Stale AD users and computers - who has not signed in for 90 days](scripts/06-identity-ad-entra-m365-users/get-stale-ad-objects) | Report | Low | Windows Server 2016+ (domain controller or domain member) |
+| [Stale guest accounts](scripts/06-identity-ad-entra-m365-users/get-stale-guests) | Report | Low | Windows 10, 11, Server 2016+, with the app certificate |
 | [Identity posture of every client tenant](scripts/06-identity-ad-entra-m365-users/get-tenant-identity-posture) | Report | Low | Windows 10, 11, Server 2016+, with the app certificate |
 | [Sign-in history of one user](scripts/06-identity-ad-entra-m365-users/get-user-signin-history) | Report | Low | Windows 10, 11, Server 2016+, with the app certificate |
 | [Compromised M365 account - contain it in order](scripts/06-identity-ad-entra-m365-users/invoke-compromised-account-containment) | Action | High | Windows 10, 11, Server 2016+, with the app certificate |
@@ -126,6 +128,7 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 | [New employee - create the AD user like a template user](scripts/06-identity-ad-entra-m365-users/new-ad-user) | Action | Low | Windows Server 2016+ (domain controller or domain member) |
 | [Create Microsoft 365 users from a CSV file](scripts/06-identity-ad-entra-m365-users/new-m365-users-from-csv) | Action | High | Windows 10, 11, Server 2016+, with the app certificate |
 | [Remove risky app consents](scripts/06-identity-ad-entra-m365-users/remove-risky-app-consents) | Action | High | Windows 10, 11, Server 2016+, with the app certificate |
+| [Remove stale guest accounts](scripts/06-identity-ad-entra-m365-users/remove-stale-guests) | Action | High | Windows 10, 11, Server 2016+, with the app certificate |
 | [Reset an AD user's password - random, forced change at logon](scripts/06-identity-ad-entra-m365-users/reset-ad-user-password) | Action | Low | Windows Server 2016+ (domain controller or domain member) |
 | [User lost their phone - reset MFA methods](scripts/06-identity-ad-entra-m365-users/reset-user-mfa-methods) | Action | High | Windows 10, 11, Server 2016+, with the app certificate |
 | [AD security group - create it, add or remove members](scripts/06-identity-ad-entra-m365-users/set-ad-group-members) | Action | Low | Windows Server 2016+ (domain controller or domain member) |
@@ -306,6 +309,7 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 | [Back up the whole Intune configuration to JSON](scripts/21-cloud-intune/invoke-intune-config-backup) | Action | Low | Windows 10, 11, Server 2016+, with the app certificate |
 | [Package an app for Intune - build the .intunewin file](scripts/21-cloud-intune/new-intune-app-package) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [Intune remediation - create the detection and remediation pair](scripts/21-cloud-intune/new-intune-remediation) | Action | Low | Windows 10, 11, Server 2016+, with the app certificate |
+| [Stale and duplicate Intune devices - delete the old records](scripts/21-cloud-intune/remove-stale-intune-devices) | Action | High | Windows 10, 11, Server 2016+, with the app certificate |
 | [App secret or certificate expiring in Microsoft 365](scripts/21-cloud-intune/test-app-credential-expiry) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
 | [Stale or duplicate devices in Intune](scripts/21-cloud-intune/test-stale-intune-devices) | Monitor | Low | Windows 10, 11, Server 2016+, with the app certificate |
 
