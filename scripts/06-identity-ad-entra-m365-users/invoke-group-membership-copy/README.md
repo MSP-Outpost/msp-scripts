@@ -14,8 +14,8 @@
 | Risk | **High** |
 | Reboot | Never |
 | Typical runtime | Under 2 minutes |
-| Version | 1.0.0 |
-| Updated | 2026-11-19 |
+| Version | 1.0.1 |
+| Updated | 2026-11-23 |
 
 ## Safety
 
@@ -102,7 +102,8 @@ Every change is also logged to `%ProgramData%\MSPOutpost\Logs\invoke-group-membe
 
 ## Changelog
 
-- 1.0.0 2026-11-19 First version (untested).
+- 1.0.1 2026-11-23 Wording only: the 1.0.0 changelog line is corrected (that version was tested before listing). No code change.
+- 1.0.0 2026-11-19 First version.
 
 ## More
 

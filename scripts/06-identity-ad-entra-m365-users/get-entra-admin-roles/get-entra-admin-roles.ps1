@@ -56,8 +56,8 @@
 .NOTES
     Name:        Who holds admin roles in Microsoft 365
     Slug:        get-entra-admin-roles
-    Version:     1.0.0
-    Updated:     2026-11-19
+    Version:     1.0.1
+    Updated:     2026-11-23
     Type:        Report
     Category:    06 Identity: AD / Entra / M365 users
     Platforms:   Windows 10, 11, Server 2016+, with the app certificate
@@ -74,7 +74,8 @@
     License:     MIT
     Disclaimer:  Provided "as is" under the MIT License, without warranty of any kind. Test before production use. MSP Outpost and User First Digital Inc. accept no liability for any damage or loss.
     Changelog:
-      1.0.0  2026-11-19  First version (untested).
+      1.0.1  2026-11-23  Wording only: the 1.0.0 changelog line is corrected (that version was tested before listing). No code change.
+      1.0.0  2026-11-19  First version.
 #>
 [CmdletBinding(SupportsShouldProcess = $true, PositionalBinding = $false)]
 param(
@@ -94,7 +95,7 @@ param(
 # Identity: must match the .NOTES header (the build checks it).
 $OutpostScript = @{
     Slug    = 'get-entra-admin-roles'
-    Version = '1.0.0'
+    Version = '1.0.1'
     Type    = 'Report'
     Risk    = 'Low'
     Inputs  = @('TenantId', 'ClientId', 'CertificateThumbprint', 'IncludeEligible')
