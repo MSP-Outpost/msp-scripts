@@ -2,7 +2,7 @@
 
 > PowerShell and bash scripts for MSPs: monitors, reports and safe fixes for Windows, macOS and Linux, from [MSP Outpost](https://mspoutpost.com/scripts).
 
-This repository holds 190 scripts: 168 PowerShell scripts for Windows and 22 bash scripts for macOS and Linux. Each one has its own folder with the script and a README that explains what it does, what it changes, which inputs it takes and how to run it in your RMM. Each script is one self-contained file: no modules to install, nothing else to copy.
+This repository holds 195 scripts: 173 PowerShell scripts for Windows and 22 bash scripts for macOS and Linux. Each one has its own folder with the script and a README that explains what it does, what it changes, which inputs it takes and how to run it in your RMM. Each script is one self-contained file: no modules to install, nothing else to copy.
 
 ## Safety first
 
@@ -174,6 +174,7 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 | Script | Type | Risk | Platforms |
 |---|---|---|---|
 | [Did last night's backup succeed?](scripts/08-backup-dr/test-backup-status) | Monitor | Low | Windows 10, Windows 11, Windows Server 2016+ |
+| [SQL Server backups too old](scripts/08-backup-dr/test-sql-backup-age) | Monitor | Low | Windows Server 2016+ with SQL Server 2012+ installed locally |
 
 ### Monitoring & health checks
 
@@ -234,9 +235,11 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 |---|---|---|---|
 | [Teams won't load - clear the Teams cache](scripts/14-remediation-self-healing/clear-teams-cache) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [RMM agent stopped, disabled or missing - start it again](scripts/14-remediation-self-healing/repair-rmm-agent) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
+| [VPN won't connect - VPN first aid](scripts/14-remediation-self-healing/repair-vpn-client) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [Windows corrupted or SFC fails - DISM then SFC repair](scripts/14-remediation-self-healing/repair-windows-image) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
 | [OneDrive not syncing - reset it](scripts/14-remediation-self-healing/reset-onedrive) | Action | Low | Windows 10, Windows 11 |
 | [Service stopped or hung - restart it](scripts/14-remediation-self-healing/restart-service) | Action | Low | Windows 10, Windows 11, Windows Server 2016+ |
+| [VPN client ready](scripts/14-remediation-self-healing/test-vpn-client) | Monitor | Low | Windows 10, Windows 11, Windows Server 2016+ |
 
 ### User profile & desktop config
 
@@ -271,6 +274,8 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 | [Is Active Directory healthy - services, replication, FSMO, dcdiag](scripts/18-server-roles-ad-ds-hyper-v-sql-iis-file-rds/test-ad-health) | Monitor | Low | Windows Server 2016+ (domain controller) |
 | [Domain controller backup too old](scripts/18-server-roles-ad-ds-hyper-v-sql-iis-file-rds/test-dc-backup-age) | Monitor | Low | Windows Server 2016+ (domain controller) |
 | [Someone changed a GPO - alert on any GPO change](scripts/18-server-roles-ad-ds-hyper-v-sql-iis-file-rds/test-gpo-changes) | Monitor | Low | Windows Server 2016+ (DC, or a member with GPMC) |
+| [Is the RDS session host healthy](scripts/18-server-roles-ad-ds-hyper-v-sql-iis-file-rds/test-rds-host-health) | Monitor | Low | Windows Server 2016+ with the Remote Desktop Session Host role |
+| [Is SQL Server healthy](scripts/18-server-roles-ad-ds-hyper-v-sql-iis-file-rds/test-sql-server-health) | Monitor | Low | Windows Server 2016+ with SQL Server 2012+ installed locally |
 
 ### macOS management
 
