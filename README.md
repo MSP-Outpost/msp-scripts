@@ -2,7 +2,7 @@
 
 > PowerShell and bash scripts for MSPs: monitors, reports and safe fixes for Windows, macOS and Linux, from [MSP Outpost](https://mspoutpost.com/scripts).
 
-This repository holds 195 scripts: 173 PowerShell scripts for Windows and 22 bash scripts for macOS and Linux. Each one has its own folder with the script and a README that explains what it does, what it changes, which inputs it takes and how to run it in your RMM. Each script is one self-contained file: no modules to install, nothing else to copy.
+This repository holds 196 scripts: 173 PowerShell scripts for Windows and 23 bash scripts for macOS and Linux. Each one has its own folder with the script and a README that explains what it does, what it changes, which inputs it takes and how to run it in your RMM. Each script is one self-contained file: no modules to install, nothing else to copy.
 
 ## Safety first
 
@@ -274,6 +274,7 @@ The full rules for inputs, output and safety are in [docs/STANDARD.md](docs/STAN
 | [Is Active Directory healthy - services, replication, FSMO, dcdiag](scripts/18-server-roles-ad-ds-hyper-v-sql-iis-file-rds/test-ad-health) | Monitor | Low | Windows Server 2016+ (domain controller) |
 | [Domain controller backup too old](scripts/18-server-roles-ad-ds-hyper-v-sql-iis-file-rds/test-dc-backup-age) | Monitor | Low | Windows Server 2016+ (domain controller) |
 | [Someone changed a GPO - alert on any GPO change](scripts/18-server-roles-ad-ds-hyper-v-sql-iis-file-rds/test-gpo-changes) | Monitor | Low | Windows Server 2016+ (DC, or a member with GPMC) |
+| [Proxmox node, quorum, guests and storage unhealthy](scripts/18-server-roles-ad-ds-hyper-v-sql-iis-file-rds/test-proxmox-health) | Monitor | Low | Proxmox VE 7+ (Debian Linux) |
 | [Is the RDS session host healthy](scripts/18-server-roles-ad-ds-hyper-v-sql-iis-file-rds/test-rds-host-health) | Monitor | Low | Windows Server 2016+ with the Remote Desktop Session Host role |
 | [Is SQL Server healthy](scripts/18-server-roles-ad-ds-hyper-v-sql-iis-file-rds/test-sql-server-health) | Monitor | Low | Windows Server 2016+ with SQL Server 2012+ installed locally |
 
